@@ -65,5 +65,6 @@ void Compute_Eigenvalues(int N, int k, double* A, double* wr, double* wi){
     Arnoldi_Iteration(Hm, A, N, m);
     dhseqr_cpp(m, Hm, wr, wi); //writes eigenvalues to wr and wi
     std::qsort(wr, m, sizeof(double), compare);
-    print_matrix(wr, 1, m);
+    std::cout<<"First "<<k<<" eigenvalues:"<<std::endl;
+    print_matrix(wr, 1, k);
 }

@@ -18,7 +18,7 @@ int main(){
             input>>A[j*n+i];
     std::cout<<"Number of eigenvalues needed:"<<std::endl;
     std::cin>>m;
-    wr = new double[m];//wr, wi - real and complex parts of eigenvalues
-    wi = new double[m];
+    wr = new double[2*m];//wr, wi - real and complex parts of eigenvalues
+    wi = new double[2*m];
     Compute_Eigenvalues(n, m, A, wr, wi);
 }
