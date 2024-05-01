@@ -21,4 +21,8 @@ int main(){
     wr = new double[2*m];//wr, wi - real and complex parts of eigenvalues
     wi = new double[2*m];
     Compute_Eigenvalues(n, m, A, wr, wi);
+    delete[] A;
+    delete[] wr;
+    delete[] wi;
+
 }

@@ -34,7 +34,6 @@ void Arnoldi_Iteration(double* Hm, double* A, int N, int m){
     double *v = new double[N];
     clear_m(v, N);
     v[0] = 1;
-
     std::vector<double*> Krylov_bases;
     Krylov_bases.push_back(v);
 
@@ -43,29 +42,36 @@ void Arnoldi_Iteration(double* Hm, double* A, int N, int m){
         clear_m(v, N);
         dgemv_cpp(N, A, Krylov_bases.back(), v);//v = Aq
         #pragma omp parallel for
-        for (int k=0; k< Krylov_bases.size(); k++){//Gram-Schmidt
-            double* q_j = Krylov_bases[k];
-            double h = ddot_cpp(N, q_j, v);//h = (q[j], v)
-            Hm[i*m + k] = h;
-        }
+        for (int k=0; k< Krylov_bases.size(); k++)//Gram-Schmidt
+            Hm[i*m + k] = ddot_cpp(N, Krylov_bases[k], v);//h[i,k]=(q[k],v)
+
         omp_set_num_threads(NUM_THREADS);
         #pragma omp parallel
-        {   double* v_temp = new double[N];
+        {
+            double* v_temp = new double[N];
+            clear_m(v_temp, N);
             int id = omp_get_thread_num();
             int nthrds = omp_get_num_threads();
             for (int k=id; k<Krylov_bases.size(); k+=nthrds)
                 daxpy_cpp(N, Hm[i*m + k], Krylov_bases[k], v_temp);//v_temp = v_temp + h*q[j]
             #pragma omp critical
-                daxpy_cpp(N, -1, v_temp, v);
-            //delete[] v_temp;
+                daxpy_cpp(N, -1, v_temp, v);//v = v - v_temp
+            delete[] v_temp;
         }
-        if (i==m)
+
+        if (i==(m-1)){
+            delete[] v;
             continue;
+        }
+
         double h = dnrm2_cpp(N, v);//h=||v||
-        Hm[i*m + Krylov_bases.size()] = h;//4, 5
+        Hm[i*m + Krylov_bases.size()] = h;
         dscal_cpp(N, 1/h, v);//v = v/h
         Krylov_bases.push_back(v);
     }
+
+    for (double* v: Krylov_bases)
+        delete[] v;
 }
 
 void Compute_Eigenvalues(int N, int k, double* A, double* wr, double* wi){
@@ -80,4 +86,5 @@ void Compute_Eigenvalues(int N, int k, double* A, double* wr, double* wi){
     std::qsort(wr, m, sizeof(double), compare);
     std::cout<<"First "<<k<<" eigenvalues:"<<std::endl;
     print_matrix(wr, 1, k);
+    delete[] Hm;
 }
