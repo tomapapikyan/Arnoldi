@@ -1,7 +1,8 @@
 #include <iostream>
 #include "CppBLAS.h"
-#include <list>
+#include <vector>
 #include <cstdlib>
+#include <omp.h>
 
 int compare(const void* a, const void* b){//for qsort
     const double* x = (double*) a;
@@ -32,24 +33,25 @@ void Arnoldi_Iteration(double* Hm, double* A, int N, int m){
     clear_m(v, N);
     v[0] = 1;
 
-    std::list<double*> Krylov_bases;
+    std::vector<double*> Krylov_bases;
     Krylov_bases.push_back(v);
 
     for (int i=0; i<m; i++){
         double *v = new double[N];
         clear_m(v, N);
         dgemv_cpp(N, A, Krylov_bases.back(), v);//v = Aq
-        int j = 0;
-        for (double* q_j: Krylov_bases){//Gram-Schmidt
+        #pragma omp parallel for
+        for (int k=0; k< Krylov_bases.size(); k++){//Gram-Schmidt
+            double* q_j = Krylov_bases[k];
             double h = ddot_cpp(N, q_j, v);//h = (q[j], v)
-            Hm[i*m + j] = h;
-            j++;
-            daxpy_cpp(N, -h, q_j, v);//v = v - h*q[j]
+            Hm[i*m + k] = h;
         }
+        for (int k=0; k<Krylov_bases.size(); k++)
+            daxpy_cpp(N, -Hm[i*m + k], Krylov_bases[k], v);//v = v - h*q[j]
         if (i==m)
             continue;
         double h = dnrm2_cpp(N, v);//h=||v||
-        Hm[i*m + j] = h;//4, 5
+        Hm[i*m + Krylov_bases.size()] = h;//4, 5
         dscal_cpp(N, 1/h, v);//v = v/h
         Krylov_bases.push_back(v);
     }

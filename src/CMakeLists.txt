@@ -10,3 +10,6 @@ find_package(LAPACK REQUIRED)
 
 target_link_libraries(CppBLAS ${LAPACK_LIBRARIES})
 
+find_package(OpenMP)
+
+target_link_libraries(Arnoldi PRIVATE OpenMP::OpenMP_CXX)
