@@ -4,6 +4,8 @@
 #include <cstdlib>
 #include <omp.h>
 
+#define NUM_THREADS 4
+
 int compare(const void* a, const void* b){//for qsort
     const double* x = (double*) a;
     const double* y = (double*) b;
@@ -46,8 +48,17 @@ void Arnoldi_Iteration(double* Hm, double* A, int N, int m){
             double h = ddot_cpp(N, q_j, v);//h = (q[j], v)
             Hm[i*m + k] = h;
         }
-        for (int k=0; k<Krylov_bases.size(); k++)
-            daxpy_cpp(N, -Hm[i*m + k], Krylov_bases[k], v);//v = v - h*q[j]
+        omp_set_num_threads(NUM_THREADS);
+        #pragma omp parallel
+        {   double* v_temp = new double[N];
+            int id = omp_get_thread_num();
+            int nthrds = omp_get_num_threads();
+            for (int k=id; k<Krylov_bases.size(); k+=nthrds)
+                daxpy_cpp(N, Hm[i*m + k], Krylov_bases[k], v_temp);//v_temp = v_temp + h*q[j]
+            #pragma omp critical
+                daxpy_cpp(N, -1, v_temp, v);
+            //delete[] v_temp;
+        }
         if (i==m)
             continue;
         double h = dnrm2_cpp(N, v);//h=||v||
