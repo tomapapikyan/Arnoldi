@@ -1,5 +1,6 @@
 #include <iostream>
 #include "CppBLAS.h"
+#include "MatVec.h"
 #include <vector>
 #include <cstdlib>
 #include <omp.h>
@@ -40,10 +41,11 @@ void Arnoldi_Iteration(double* Hm, double* A, int N, int m){
     for (int i=0; i<m; i++){
         double *v = new double[N];
         clear_m(v, N);
-        dgemv_cpp(N, A, Krylov_bases.back(), v);//v = Aq
+        dgemv(N, A, Krylov_bases.back(), v);//v = Aq
+
         #pragma omp parallel for
         for (int k=0; k< Krylov_bases.size(); k++)//Gram-Schmidt
-            Hm[i*m + k] = ddot_cpp(N, Krylov_bases[k], v);//h[i,k]=(q[k],v)
+            Hm[i*m + k] = ddot(N, Krylov_bases[k], v);//h[i,k]=(q[k],v)
 
         omp_set_num_threads(NUM_THREADS);
         #pragma omp parallel
@@ -53,9 +55,9 @@ void Arnoldi_Iteration(double* Hm, double* A, int N, int m){
             int id = omp_get_thread_num();
             int nthrds = omp_get_num_threads();
             for (int k=id; k<Krylov_bases.size(); k+=nthrds)
-                daxpy_cpp(N, Hm[i*m + k], Krylov_bases[k], v_temp);//v_temp = v_temp + h*q[j]
+                daxpy(N, Hm[i*m + k], Krylov_bases[k], v_temp);//v_temp = v_temp + h*q[j]
             #pragma omp critical
-                daxpy_cpp(N, -1, v_temp, v);//v = v - v_temp
+                daxpy(N, -1, v_temp, v);//v = v - v_temp
             delete[] v_temp;
         }
 
@@ -64,9 +66,9 @@ void Arnoldi_Iteration(double* Hm, double* A, int N, int m){
             continue;
         }
 
-        double h = dnrm2_cpp(N, v);//h=||v||
+        double h = dnrm2(N, v);//h=||v||
         Hm[i*m + Krylov_bases.size()] = h;
-        dscal_cpp(N, 1/h, v);//v = v/h
+        dscal(N, 1/h, v);//v = v/h
         Krylov_bases.push_back(v);
     }
 

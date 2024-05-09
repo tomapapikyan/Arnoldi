@@ -1,3 +1,3 @@
 add_executable(main main.cpp)
 
-target_link_libraries(main Arnoldi CppBLAS)
+target_link_libraries(main Arnoldi CppBLAS MatVec)
