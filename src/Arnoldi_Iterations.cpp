@@ -4,6 +4,7 @@
 #include <vector>
 #include <cstdlib>
 #include <omp.h>
+#include <cmath>
 
 #define NUM_THREADS 4
 
@@ -34,7 +35,7 @@ for (int i=0; i<n; i++){
 void Arnoldi_Iteration(double* Hm, double* A, int N, int m){
     double *v = new double[N];
     clear_m(v, N);
-    v[0] = 1;
+    v[0] = 1/sqrt(3); v[1] = v[0]; v[2] = v[0];
     std::vector<double*> Krylov_bases;
     Krylov_bases.push_back(v);
 
