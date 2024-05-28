@@ -1,1 +1,3 @@
-void Compute_Eigenvalues(int, int, double*, double*, double*);
+#include "MatrixTemplate.h"
+
+void Compute_Eigenvalues(int, Matvec&, double*, double*);
