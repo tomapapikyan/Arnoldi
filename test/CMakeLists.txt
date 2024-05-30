@@ -1,6 +1,6 @@
 add_executable(main main.cpp)
 
-target_link_libraries(main Arnoldi CppBLAS VectorFunctions MatrixTemplate)
+target_link_libraries(main CppBLAS VectorFunctions MatrixTemplate)
 
 #find_package(OpenMP)
 

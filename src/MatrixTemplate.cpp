@@ -1,8 +1,8 @@
 #include "MatrixTemplate.h"
 #include <iostream>
 
-Matvec::Matvec(int n, int m){
-    matrix = new double[n*m];
+Matvec::Matvec(int n, int m, double* a){
+    matrix = a;
     columns = m;
     rows = n;
 }
@@ -36,10 +36,6 @@ omp_set_num_threads(6);
 for (int i=0; i<rows; i++)
     for (int j=0; j<columns; j++)
         prod[i] += matrix[j*rows + i] * vec[j];
-}
-
-Matvec::~Matvec(){
-    delete[] matrix;
 }
 
 void Matvec::fill_matrix(){

@@ -8,11 +8,11 @@ private:
     double* matrix;
 
 public:
-    Matvec(int, int);
+    Matvec(int, int, double*);
 
     Matvec(Matvec const&);
 
-    ~Matvec();
+//    ~Matvec();
 
     double* get_matrix();
 

@@ -1,17 +1,19 @@
 #include <iostream>
 #include <fstream>
-#include "Arnoldi_Iterations.h"
+#include "Arnoldi_Iterations.hpp"
 #include "CppBLAS.h"
 
 int main(){
     int n, m;
-    double *wr, *wi;
+    double *wr, *wi, *matrix;
     double itime, ftime, exec_time;
 
     std::cout<<"Matrix size:\n";
     std::cin>>n;
 
-    Matvec A(n, n);
+    matrix = new double[n*n];
+
+    Matvec A(n, n, matrix);
     A.fill_matrix();
 
     std::cout<<"Number of eigenvalues needed:"<<std::endl;
