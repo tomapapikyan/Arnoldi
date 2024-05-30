@@ -1,27 +1,33 @@
 #include <iostream>
 #include <fstream>
-#include "Arnoldi_Iterations.h"
+#include "Arnoldi_Iterations.hpp"
 #include "CppBLAS.h"
 
 int main(){
-    std::ifstream input("../../test/input.txt");
-    double *A, *wr, *wi;
     int n, m;
+    double *wr, *wi, *matrix;
+    double itime, ftime, exec_time;
 
-    if (!input.is_open())
-        return 1;
+    std::cout<<"Matrix size:\n";
+    std::cin>>n;
 
-    input>>n;
-    A = new double[n*n];
-    for (int i=0; i<n; i++)
-        for (int j=0; j<n; j++)
-            input>>A[j*n+i];
+    matrix = new double[n*n];
+
+    Matvec A(n, n, matrix);
+    A.fill_matrix();
+
     std::cout<<"Number of eigenvalues needed:"<<std::endl;
     std::cin>>m;
     wr = new double[2*m];//wr, wi - real and complex parts of eigenvalues
     wi = new double[2*m];
-    Compute_Eigenvalues(n, m, A, wr, wi);
-    delete[] A;
+
+    itime = omp_get_wtime();
+    Compute_Eigenvalues(m, A, wr, wi);
+    ftime = omp_get_wtime();
+
+    exec_time = ftime - itime;
+    std::cout<<"Time: "<<exec_time<<std::endl;
+
     delete[] wr;
     delete[] wi;
 
